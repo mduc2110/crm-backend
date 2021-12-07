@@ -1,0 +1,19 @@
+{
+  "name": "crm-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mduc2110/crm-backend.git"
+  },
+  "author": "brian",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mduc2110/crm-backend/issues"
+  },
+  "homepage": "https://github.com/mduc2110/crm-backend#readme"
+}
