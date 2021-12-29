@@ -1,3 +1,5 @@
+import Role from "./role.model";
+
 export default (sequelize, Sequelize) => {
    const User = sequelize.define("user", {
       id: {
@@ -40,10 +42,17 @@ export default (sequelize, Sequelize) => {
          },
       },
       name: {
-         type: Sequelize.STRING,
+         type: Sequelize.STRING(100),
          allowNull: false,
          validate: {
             notEmpty: true,
+         },
+      },
+      roleId: {
+         type: Sequelize.UUID,
+         references: {
+            model: "roles", // 'Actors' would also work
+            key: "id",
          },
       },
    });

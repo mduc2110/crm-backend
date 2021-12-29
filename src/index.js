@@ -1,7 +1,7 @@
 import express from "express";
-import routes from "./routes";
-import db from "./models/index";
-import passport from "passport";
+// import routes from "./routes";
+// import db from "./models/junctions";
+// import passport from "passport";
 import { ExtractJwt } from "passport-jwt/lib";
 import JwtStrategy from "passport-jwt/lib/strategy";
 import passportConfig from "./config/passport";
@@ -10,13 +10,15 @@ const port = process.env.PORT || 5555;
 const app = express();
 
 app.use(express.json());
-app.use(passport.initialize());
+// app.use(passport.initialize());
 
-passportConfig(passport);
+// passportConfig(passport);
 
-db.sequelize.sync();
+// db.sequelize.sync({ alter: true }).catch((err) => {
+//    console.log(err.message);
+// });
 
-app.use("/api", routes);
+// app.use("/api", routes);
 
 // const opts = {};
 // opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
@@ -28,9 +30,9 @@ app.use("/api", routes);
 //    })
 // );
 
-app.get("/", passport.authenticate("jwt", { session: false }), (req, res) => {
-   res.json("OK");
-});
+// app.get("/", passport.authenticate("jwt", { session: false }), (req, res) => {
+//    res.json("OK");
+// });
 
 app.listen(port, () => {
    console.log(`Server is running on ${port}`);

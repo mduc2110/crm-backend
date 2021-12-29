@@ -1,7 +1,7 @@
 import { ExtractJwt } from "passport-jwt";
 import JwtStrategy from "passport-jwt/lib/strategy";
 import passport from "passport";
-import db from "../models";
+import db from "../../junctions";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const User = db.User;

@@ -4,8 +4,6 @@ import passport from "passport";
 import db from "../../models/user.model";
 import { auth } from "../../middlewares/checkAuth";
 
-const User = db.User;
-
 const router = express.Router();
 
 // router.get("/users", (req, res) => {
