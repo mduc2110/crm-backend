@@ -1,0 +1,19 @@
+npx sequelize-cli db:migrate
+
+
+npx sequelize-cli model:generate --name roles --attributes 
+npx sequelize-cli migration:generate --name
+
+npx sequelize-cli db:migrate:undo:all --to name
+
+npx sequelize-cli seed:generate --name demo-user
+
+npx sequelize-cli db:seed:all
+
+npx sequelize-cli db:seed --seed seed-name
+
+npx sequelize-cli db:seed:undo:all
+
+
+
+SELECT COLUMN_NAME, DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'database_development' AND  TABLE_NAME = 'roles';
