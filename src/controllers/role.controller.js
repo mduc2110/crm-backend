@@ -1,6 +1,7 @@
-import db from "../../junctions";
+import db from "../models";
 
-const Role = db.Role;
+const Role = db.roles;
+const Permission = db.permissions;
 
 export const roleController = {
    create: async (req, res) => {
@@ -13,7 +14,28 @@ export const roleController = {
          return res.status(400).json({ msg: error.message });
       }
    },
-   getOne: async (req, res) => {},
+   getOne: async (req, res) => {
+      const { id } = req.params;
+      if (!id) {
+         res.status(400).json({ msg: "Invalid ID" });
+      }
+      try {
+         const result = await Role.findOne({
+            where: {
+               id: id,
+            },
+            attributes: { exclude: ["createdAt", "updatedAt"] },
+            include: {
+               model: Permission,
+               attributes: { exclude: ["createdAt", "updatedAt", "asso_role_permissions"] },
+               through: { attributes: [] },
+            },
+         });
+         return res.status(200).json(result);
+      } catch (error) {
+         return res.status(400).json({ msg: error.message });
+      }
+   },
    update: async (req, res) => {},
    delete: async (req, res) => {},
    getAll: async (req, res) => {},

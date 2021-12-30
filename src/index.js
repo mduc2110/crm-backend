@@ -1,6 +1,6 @@
 import express from "express";
-// import routes from "./routes";
-// import db from "./models/junctions";
+import routes from "./routes";
+import db from "./models";
 // import passport from "passport";
 import { ExtractJwt } from "passport-jwt/lib";
 import JwtStrategy from "passport-jwt/lib/strategy";
@@ -14,12 +14,11 @@ app.use(express.json());
 
 // passportConfig(passport);
 
-// db.sequelize.sync({ alter: true }).catch((err) => {
-//    console.log(err.message);
-// });
+db.sequelize.sync({ alter: true }).catch((err) => {
+   console.log(err.message);
+});
 
-// app.use("/api", routes);
-
+app.use("/api", routes);
 // const opts = {};
 // opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 // opts.secretOrKey = process.env.TOKEN_SECRET;
