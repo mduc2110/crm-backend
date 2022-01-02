@@ -1,9 +1,9 @@
 import JwtStrategy from "passport-jwt/lib/strategy";
 import { ExtractJwt } from "passport-jwt/lib";
-
+import config from "../config";
 const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = process.env.TOKEN_SECRET;
+opts.secretOrKey = config.token_secret;
 
 export default (passport) => {
    passport.use(

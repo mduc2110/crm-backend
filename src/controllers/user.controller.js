@@ -1,10 +1,15 @@
 import { ExtractJwt } from "passport-jwt";
 import JwtStrategy from "passport-jwt/lib/strategy";
 import passport from "passport";
-import db from "../../junctions";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-const User = db.User;
+
+import db from "../models";
+import config from "../config";
+
+const User = db.users;
+const Role = db.roles;
+const Permission = db.permissions;
 
 // const opts = {};
 // opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
@@ -32,21 +37,35 @@ export const userController = {
    login: async (req, res) => {
       const { username, password } = req.body;
       try {
-         const user = await User.findOne({ where: { username: username } });
+         const user = await User.findOne({
+            where: { username: username },
+            attributes: { exclude: ["createdAt", "updatedAt"] },
+            include: {
+               model: Role,
+               attributes: { exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"] },
+               include: {
+                  model: Permission,
+                  attributes: { exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"] },
+                  through: { attributes: [] },
+               },
+            },
+         });
+         // return res.status(200).json(user);
          if (user) {
             delete user.password;
             const validPass = await bcrypt.compare(password, user.password);
             if (validPass) {
                res.status(200).json({
-                  info: user,
+                  message: "success",
                   token:
                      "Bearer " +
                      jwt.sign(
                         {
                            username: user.username,
                            id: user.id,
+                           role: user.role,
                         },
-                        process.env.TOKEN_SECRET,
+                        config.token_secret,
                         // { expiresIn: "12h" }
                         { expiresIn: 86400 }
                      ),
@@ -62,21 +81,21 @@ export const userController = {
       }
    },
    create: async (req, res) => {
-      const { username, password, email, name } = req.body;
+      const { username, password, email, name, phone, roleId } = req.body;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       if (!password) {
-         res.json({ message: "password is required" });
+         return res.json({ message: "password is required" });
       }
       const hashed_password = bcrypt.hashSync(password, salt);
+      // return res.json(hashed_password);
       try {
-         const user = { username, password: hashed_password, email, name };
+         const user = { username, password: hashed_password, email, name, roleId, phone };
          const response = await User.create(user);
-         res.json({ res: response });
+         return res.json({ data: response });
       } catch (error) {
-         res.json({ msg: error.message });
+         return res.json({ msg: error.message });
       }
-      return res.json("OK");
    },
    getAll: async (req, res) => {
       return res.json("OK");

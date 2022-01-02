@@ -1,7 +1,7 @@
 import express from "express";
 import { userController } from "../../controllers/user.controller";
 import passport from "passport";
-import db from "../../models/user.model";
+// import db from "../../models/user.model";
 import { auth } from "../../middlewares/checkAuth";
 
 const router = express.Router();
