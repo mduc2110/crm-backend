@@ -3,7 +3,7 @@ import JwtStrategy from "passport-jwt/lib/strategy";
 import passport from "passport";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import { finder } from "../utils/addressCodeFinder";
 import db from "../models";
 import config from "../config";
 
@@ -42,10 +42,20 @@ export const userController = {
             attributes: { exclude: ["createdAt", "updatedAt"] },
             include: {
                model: Role,
-               attributes: { exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"] },
+               attributes: {
+                  exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"],
+               },
                include: {
                   model: Permission,
-                  attributes: { exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"] },
+                  attributes: {
+                     exclude: [
+                        "createdAt",
+                        "updatedAt",
+                        "asso_role_permissions",
+                        "id",
+                        "description",
+                     ],
+                  },
                   through: { attributes: [] },
                },
             },
@@ -98,6 +108,10 @@ export const userController = {
       }
    },
    getAll: async (req, res) => {
+      // console.log(finder.getProvinceName("thanh-pho-ha-noi"));
+      console.log(finder.getProvinceName("thanh-pho-ha-noi"));
+      console.log(finder.getDistrictName("thanh-pho-ho-chi-minh", "quan-tan-binh"));
+      console.log(finder.getWardName("quan-tan-binh", "26989-0001"));
       return res.json("OK");
    },
    getOne: async (req, res) => {
