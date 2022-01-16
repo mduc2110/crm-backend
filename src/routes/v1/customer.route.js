@@ -5,9 +5,9 @@ const router = express.Router();
 
 router.post("/customer", customerController.create);
 router.get("/customers", customerController.getAll);
-router.get("/customer/:id", customerController.getOne);
-router.put("/customer/:id", customerController.update);
-router.delete("/customer/:id", customerController.delete);
+router.get("/customers/:id", customerController.getOne);
+router.put("/customers/:id", customerController.update);
+router.delete("/customers/:id", customerController.delete);
 
 export default router;
 

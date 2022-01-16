@@ -34,16 +34,30 @@ module.exports = (sequelize, DataTypes) => {
    }
    customer.init(
       {
-         customerName: DataTypes.STRING,
-         phone: DataTypes.STRING,
-         email: DataTypes.STRING,
+         customerName: {
+            type: DataTypes.STRING,
+            allowNull: false,
+         },
+         phone: {
+            type: DataTypes.STRING,
+            allowNull: false,
+         },
+         email: {
+            type: DataTypes.STRING,
+            validate: {
+               isEmail: true,
+            },
+            allowNull: false,
+         },
          birthday: DataTypes.DATE,
          gender: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
          personalID: DataTypes.STRING,
-         // idAddress: DataTypes.INTEGER,
-         // idTag: DataTypes.INTEGER,
-         // idType: DataTypes.INTEGER,
-         // idStatus: DataTypes.INTEGER,
+         idTag: DataTypes.INTEGER,
+         idStatus: DataTypes.INTEGER,
+         idProvince: DataTypes.STRING,
+         idDistrict: DataTypes.STRING,
+         idWard: DataTypes.STRING,
+         detailAddress: DataTypes.STRING,
       },
       {
          sequelize,
