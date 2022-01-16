@@ -3,7 +3,7 @@ import JwtStrategy from "passport-jwt/lib/strategy";
 import passport from "passport";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { finder } from "../utils/addressCodeFinder";
+import { finder } from "../utils/addressHelper";
 import db from "../models";
 import config from "../config";
 

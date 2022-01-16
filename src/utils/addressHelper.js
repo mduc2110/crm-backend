@@ -25,7 +25,9 @@ export const finder = {
    getDistrictName: (provinceCode, districtCode) => {
       const districtListByProvince = districtData.district[provinceCode];
       if (districtListByProvince) {
-         const districtName = districtListByProvince.find((element) => element.code === districtCode);
+         const districtName = districtListByProvince.find(
+            (element) => element.code === districtCode
+         );
          return districtName ? districtName : Error("Mising or wrong district code");
       } else {
          throw Error("Mising or wrong province code");
@@ -79,4 +81,21 @@ export const validateAddressCode = (provinceCode, districtCode, wardCode) => {
       };
    }
    return { isValid: true, msg: "Address codes is Valid!" };
+};
+
+export const getAddressData = (provinceCode, districtCode, wardCode, detailAddress) => {
+   const province = provinceList.find((element) => element.code === provinceCode);
+
+   const districtList = getDistrictListByProvinceCode(provinceCode);
+   const district = districtList.find((element) => element.code === districtCode);
+
+   const wardList = getWardListByDistrictCode(districtCode);
+   const ward = wardList.find((element) => element.code === wardCode);
+
+   return {
+      province,
+      district,
+      ward,
+      detailAddress,
+   };
 };
