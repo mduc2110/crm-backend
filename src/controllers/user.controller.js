@@ -48,13 +48,7 @@ export const userController = {
                include: {
                   model: Permission,
                   attributes: {
-                     exclude: [
-                        "createdAt",
-                        "updatedAt",
-                        "asso_role_permissions",
-                        "id",
-                        "description",
-                     ],
+                     exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"],
                   },
                   through: { attributes: [] },
                },
@@ -64,16 +58,24 @@ export const userController = {
          if (user) {
             delete user.password;
             const validPass = await bcrypt.compare(password, user.password);
+            const permissionsList = user.role.permissions.map((object) => object.permissionName);
             if (validPass) {
                res.status(200).json({
                   message: "success",
+                  user: {
+                     id: user.id,
+                     name: user.name,
+                     emai: user.email,
+                     permissions: permissionsList,
+                  },
                   token:
                      "Bearer " +
                      jwt.sign(
                         {
                            username: user.username,
                            id: user.id,
-                           role: user.role,
+                           permissions: permissionsList,
+                           role: user.role.roleName,
                         },
                         config.token_secret,
                         // { expiresIn: "12h" }
@@ -91,7 +93,7 @@ export const userController = {
       }
    },
    create: async (req, res) => {
-      const { username, password, email, name, phone, roleId } = req.body;
+      const { username, password, email, name, phone, roleId, active } = req.body;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       if (!password) {
@@ -100,7 +102,7 @@ export const userController = {
       const hashed_password = bcrypt.hashSync(password, salt);
       // return res.json(hashed_password);
       try {
-         const user = { username, password: hashed_password, email, name, roleId, phone };
+         const user = { username, password: hashed_password, email, name, roleId, phone, active };
          const response = await User.create(user);
          return res.json({ data: response });
       } catch (error) {
