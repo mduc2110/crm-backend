@@ -10,34 +10,24 @@ module.exports = {
          },
          customerName: {
             type: Sequelize.STRING,
+            allowNull: false,
          },
          phone: {
             type: Sequelize.STRING,
+            allowNull: false,
          },
          email: {
             type: Sequelize.STRING,
+            allowNull: false,
          },
          birthday: {
             type: Sequelize.DATE,
          },
          gender: {
-            // type: Sequelize.ENUM("MALE", "FEMALE", "OTHER"),
-            type: Sequelize.ENUM(["MALE", "FEMALE", "OTHER"]),
+            type: Sequelize.ENUM(["Nam", "Nữ", "Khác"]),
          },
          personalID: {
             type: Sequelize.STRING,
-         },
-         idAddress: {
-            type: Sequelize.INTEGER,
-            references: {
-               // model: {
-               //    tableName: "addresses",
-               //    schema: "crm_db",
-               // },
-               model: "addresses",
-               key: "id",
-            },
-            allowNull: false,
          },
          idTag: {
             type: Sequelize.INTEGER,
@@ -61,6 +51,21 @@ module.exports = {
                model: "customerstatuses",
                key: "id",
             },
+         },
+         addressId: {
+            type: Sequelize.STRING,
+         },
+         idProvince: {
+            type: Sequelize.STRING,
+         },
+         idDistrict: {
+            type: Sequelize.STRING,
+         },
+         idWard: {
+            type: Sequelize.STRING,
+         },
+         detailAddress: {
+            type: Sequelize.STRING,
          },
          createdAt: {
             allowNull: false,

@@ -18,15 +18,9 @@ module.exports = (sequelize, DataTypes) => {
          });
          customer.belongsTo(models.customerTag, {
             // foreignKey: "roleId",
+
             foreignKey: {
                field: "idTag",
-               allowNull: false,
-            },
-         });
-         customer.belongsTo(models.address, {
-            // foreignKey: "roleId",
-            foreignKey: {
-               field: "idAddress",
                allowNull: false,
             },
          });
@@ -50,10 +44,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
          },
          birthday: DataTypes.DATE,
-         gender: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
+         gender: DataTypes.ENUM("Nam", "Nữ", "Khác"),
          personalID: DataTypes.STRING,
-         idTag: DataTypes.INTEGER,
-         idStatus: DataTypes.INTEGER,
          idProvince: DataTypes.STRING,
          idDistrict: DataTypes.STRING,
          idWard: DataTypes.STRING,
