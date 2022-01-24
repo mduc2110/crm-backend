@@ -1,3 +1,7 @@
+const isHadPermission = (permissionList, permissionType, role = "") => {
+   return permissionList.includes(permissionType) || role === "ADMIN";
+};
+
 export const auth = {
    userAuth: (req, res, next) => {
       console.log(req.user);
@@ -6,6 +10,9 @@ export const auth = {
 
    customerAuth: (req, res, next) => {
       // console.log(req.user);
+      if (isHadPermission(req.user.permissions, "READ_CAMPAIN", req.user.role)) {
+         next();
+      }
       if (req.user.permissions.includes("READ_CAMPAIN")) {
          next();
       } else {
@@ -17,15 +24,46 @@ export const auth = {
       next();
    },
 
-   readCutomer: (req, res, next) => {
-      if (req.user.permissions.includes("READ_CUSTOMER")) {
+   //User
+   readUserAuth: (req, res, next) => {
+      if (isHadPermission(req.user.permissions, "READ_USER", req.user.role)) {
          next();
       } else {
          return res.status(403).json({ msg: "Forbidden" });
       }
    },
-   writeCutomer: (req, res, next) => {
-      if (req.user.permissions.includes("WRITE_CUSTOMER")) {
+   writeUserAuth: (req, res, next) => {
+      if (isHadPermission(req.user.permissions, "WRITE_USER", req.user.role)) {
+         next();
+      } else {
+         return res.status(403).json({ msg: "Forbidden" });
+      }
+   },
+   //Customer
+   readCutomerAuth: (req, res, next) => {
+      if (isHadPermission(req.user.permissions, "READ_CUSTOMER", req.user.role)) {
+         next();
+      } else {
+         return res.status(403).json({ msg: "Forbidden" });
+      }
+   },
+   writeCutomerAuth: (req, res, next) => {
+      if (isHadPermission(req.user.permissions, "WRITE_CUSTOMER", req.user.role)) {
+         next();
+      } else {
+         return res.status(403).json({ msg: "Forbidden" });
+      }
+   },
+   //Task
+   readTaskAuth: (req, res, next) => {
+      if (isHadPermission(req.user.permissions, "READ_TASK", req.user.role)) {
+         next();
+      } else {
+         return res.status(403).json({ msg: "Forbidden" });
+      }
+   },
+   writeTaskAuth: (req, res, next) => {
+      if (isHadPermission(req.user.permissions, "WRITE_TASK", req.user.role)) {
          next();
       } else {
          return res.status(403).json({ msg: "Forbidden" });
