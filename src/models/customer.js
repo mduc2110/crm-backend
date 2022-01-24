@@ -24,6 +24,8 @@ module.exports = (sequelize, DataTypes) => {
                allowNull: false,
             },
          });
+
+         customer.hasMany(models.tasks);
       }
    }
    customer.init(

@@ -12,21 +12,20 @@ module.exports = {
        * }], {});
        */
       await queryInterface.bulkInsert(
-         "customers",
+         "tasktypes",
          [
             {
-               customerName: "Vũ Mạnh Đức",
-               phone: "0932174169",
-               email: "vmd211099@gmail.com",
-               birthday: "1999-10-21",
-               gender: "Nam",
-               personalID: "025842575",
-               idStatus: "1",
-               idTag: "1",
-               idProvince: "thanh-pho-ho-chi-minh",
-               idDistrict: "quan-binh-tan",
-               idWard: "27439-0001",
-               detailAddress: "15 Đường số 4",
+               nameType: "Hẹn Gặp",
+               createdAt: new Date(),
+               updatedAt: new Date(),
+            },
+            {
+               nameType: "Bảo Hành",
+               createdAt: new Date(),
+               updatedAt: new Date(),
+            },
+            {
+               nameType: "Gọi Điện",
                createdAt: new Date(),
                updatedAt: new Date(),
             },
@@ -42,6 +41,5 @@ module.exports = {
        * Example:
        * await queryInterface.bulkDelete('People', null, {});
        */
-      await queryInterface.bulkDelete("People", null, {});
    },
 };

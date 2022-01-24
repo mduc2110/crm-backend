@@ -16,6 +16,16 @@ module.exports = (sequelize, DataTypes) => {
                allowNull: false,
             },
          });
+
+         users.belongsTo(models.depts, {
+            // foreignKey: "roleId",
+            foreignKey: {
+               field: "deptId",
+               allowNull: false,
+            },
+         });
+
+         users.hasMany(models.tasks);
       }
    }
    users.init(

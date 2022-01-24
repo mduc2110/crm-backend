@@ -28,6 +28,9 @@ passportConfig(passport);
 //    console.log(err.message);
 // });
 
+const { dirname } = require("path");
+const appDir = dirname(require.main.filename);
+
 try {
    db.sequelize.sync().catch((err) => {
       console.log(err.message);
@@ -62,7 +65,7 @@ app.post("/hook", (req, res) => {
 app.get("/", passport.authenticate("jwt", { session: false }), (req, res) => {
    res.json("OK");
 });
-console.log(config);
+// console.log(config);
 app.listen(port, () => {
    console.log(`Server is running on ${config.port}`);
 });

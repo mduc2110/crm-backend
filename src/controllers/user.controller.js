@@ -48,7 +48,13 @@ export const userController = {
                include: {
                   model: Permission,
                   attributes: {
-                     exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"],
+                     exclude: [
+                        "createdAt",
+                        "updatedAt",
+                        "asso_role_permissions",
+                        "id",
+                        "description",
+                     ],
                   },
                   through: { attributes: [] },
                },
@@ -68,6 +74,7 @@ export const userController = {
                      emai: user.email,
                      permissions: permissionsList,
                   },
+                  token_expire: config.token_expire,
                   token:
                      "Bearer " +
                      jwt.sign(
@@ -79,7 +86,7 @@ export const userController = {
                         },
                         config.token_secret,
                         // { expiresIn: "12h" }
-                        { expiresIn: 86400 }
+                        { expiresIn: config.token_expire }
                      ),
                });
             } else {
@@ -89,7 +96,7 @@ export const userController = {
             res.status(400).json("Invalid username");
          }
       } catch (error) {
-         return res.json({ msg: error.message });
+         return res.status(400).json({ msg: error.message });
       }
    },
    create: async (req, res) => {
