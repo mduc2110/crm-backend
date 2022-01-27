@@ -1,5 +1,7 @@
 import db from "../models";
 import { getAddressData, validateAddressCode } from "../utils/addressHelper";
+import xlsx from "xlsx";
+import { excelDateFormater } from "../utils/excelDateFormater";
 
 const Address = db.address;
 const Customer = db.customer;
@@ -58,10 +60,7 @@ export const customerController = {
    getOne: async (req, res) => {
       const { id } = req.params;
       try {
-         const customer = await Customer.findOne({
-            where: {
-               id,
-            },
+         const customer = await Customer.findByPk(id, {
             attributes: {
                exclude: ["createdAt", "updatedAt", "customerStatusId", "customerTagId"],
             },
@@ -83,21 +82,34 @@ export const customerController = {
          if (!customer) {
             throw Error("Customer not found!");
          }
-         const transformedCustomerData = Object.assign({}, customer.dataValues);
-         const { idProvince, idDistrict, idWard, detailAddress } = transformedCustomerData;
+         // const transformedCustomerData = Object.assign({}, customer.dataValues);
+         // const { idProvince, idDistrict, idWard, detailAddress } = transformedCustomerData;
 
-         delete transformedCustomerData.idProvince;
-         delete transformedCustomerData.idDistrict;
-         delete transformedCustomerData.idWard;
-         delete transformedCustomerData.detailAddress;
-
-         const addressObject = getAddressData(idProvince, idDistrict, idWard, detailAddress);
-
-         transformedCustomerData.address = addressObject;
+         // delete transformedCustomerData.idProvince;
          // delete transformedCustomerData.idDistrict;
-         // const e = getAddressData(customer.idProvince, customer.idDistrict, customer.idWard);
-         // return res.status(200).json(transformedCustomerData);
-         return res.status(200).json(transformedCustomerData);
+         // delete transformedCustomerData.idWard;
+         // delete transformedCustomerData.detailAddress;
+
+         // const addressObject = getAddressData(idProvince, idDistrict, idWard, detailAddress);
+
+         // transformedCustomerData.address = addressObject;
+         const { idProvince, idDistrict, idWard, detailAddress } = customer.dataValues;
+
+         const formattedCustomerObject = {
+            ...customer.dataValues,
+            address:
+               idProvince && idDistrict && idWard && detailAddress
+                  ? getAddressData(idProvince, idDistrict, idWard, detailAddress)
+                  : {},
+            // address: getAddressData(idProvince, idDistrict, idWard, detailAddress),
+         };
+
+         delete formattedCustomerObject.idProvince;
+         delete formattedCustomerObject.idDistrict;
+         delete formattedCustomerObject.idWard;
+         delete formattedCustomerObject.detailAddress;
+
+         return res.status(200).json(formattedCustomerObject);
       } catch (error) {
          return res.status(400).json({ msg: error.message });
       }
@@ -126,8 +138,25 @@ export const customerController = {
       }
    },
    getAll: async (req, res) => {
+      const getPagination = (page, limit) => {
+         const size = limit ? +limit : null;
+         const offset = page && +page !== 0 ? (+page - 1) * limit : null;
+         console.log(offset);
+         return { size, offset };
+      };
+      const getPagingData = (data, page, limit) => {
+         const { count: totalItems, rows: result } = data;
+         const currentPage = page ? +page : 0;
+         const totalPages = Math.ceil(totalItems / limit);
+
+         return { totalItems, result, totalPages, currentPage };
+      };
       try {
-         const customer = await Customer.findAll({
+         const { page, limit, q } = req.query;
+         const condition = q ? { name: { [Op.like]: `%${q}%` } } : null;
+         const { size, offset } = getPagination(page, limit);
+
+         const customers = await Customer.findAll({
             attributes: {
                exclude: ["createdAt", "updatedAt", "customerStatusId", "customerTagId"],
             },
@@ -145,11 +174,15 @@ export const customerController = {
                   },
                },
             ],
+            where: condition,
+            limit: size,
+            offset: offset,
          });
          // getAddressData
-         res.json(customer);
+         const customerTransformed = getPagingData(customers, page, limit);
+         return res.json(customers);
       } catch (error) {
-         res.status(400).json({ msg: error.message });
+         return res.status(400).json({ msg: error.message });
       }
    },
    createCustomersWithExcelFiles: async (req, res) => {
@@ -157,31 +190,40 @@ export const customerController = {
          if (req.file == undefined) {
             return res.status(400).send("Please upload an excel file!");
          }
-         let path = "./src/statics/uploads/excelFiles" + req.file.filename;
 
+         let path = "./src/static/uploads/excelFiles/" + req.file.filename;
          // const workSheetsFromBuffer = xlsx.parse(fs.readFileSync(path));
          var workbook = xlsx.readFile(path);
          var sheet_name_list = workbook.SheetNames;
          var xlData = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-         const tutorials = xlData.map((item) => {
+         const customersUpload = xlData.map((item) => {
             return {
-               fullName: item["Tên khách hàng"],
-               email: item["Email"],
+               customerName: item["Tên khách hàng"],
                phone: item["Số điện thoại"],
-               dob: formatDateFromXlsx(item["Ngày sinh"]),
+               email: item["Email"],
+               birthday: excelDateFormater(item["Ngày sinh"]),
+               gender: item["Giới tính"],
+               personalID: item["Căn cước công dân"],
+               customerStatusId: 1,
+               customerTagId: 1,
+               idProvince: item["Thành phố"],
+               idDistrict: item["Quận/Huyện"],
+               idWard: item["Phường"],
+               detailAddress: item["Địa chỉ chi tiết"],
             };
          });
          try {
-            const response = await Customer.bulkCreate(tutorials);
-            res.json(response);
+            // const response = await Customer.bulkCreate(customersUpload);
+            return res.status(201).json(customersUpload);
          } catch (error) {
-            res.json(error);
+            return res.status(400).json({ msg: error.message });
          }
       } catch (error) {
-         console.log(error);
-         res.status(500).send({
-            message: "Could not upload the file: " + req.file.originalname,
-         });
+         // console.log(error);
+         return res.status(400).json({ msg: error.message });
+         // res.status(500).send({
+         //    message: "Could not upload the file: " + req.file.originalname,
+         // });
       }
    },
 };

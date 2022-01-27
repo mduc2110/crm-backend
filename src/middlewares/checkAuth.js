@@ -40,14 +40,14 @@ export const auth = {
       }
    },
    //Customer
-   readCutomerAuth: (req, res, next) => {
+   readCustomerAuth: (req, res, next) => {
       if (isHadPermission(req.user.permissions, "READ_CUSTOMER", req.user.role)) {
          next();
       } else {
          return res.status(403).json({ msg: "Forbidden" });
       }
    },
-   writeCutomerAuth: (req, res, next) => {
+   writeCustomerAuth: (req, res, next) => {
       if (isHadPermission(req.user.permissions, "WRITE_CUSTOMER", req.user.role)) {
          next();
       } else {

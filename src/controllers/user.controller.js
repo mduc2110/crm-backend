@@ -74,7 +74,7 @@ export const userController = {
                      emai: user.email,
                      permissions: permissionsList,
                   },
-                  token_expire: config.token_expire,
+                  token_expire: Date.now() + config.token_expire * 1000,
                   token:
                      "Bearer " +
                      jwt.sign(
@@ -86,7 +86,7 @@ export const userController = {
                         },
                         config.token_secret,
                         // { expiresIn: "12h" }
-                        { expiresIn: config.token_expire }
+                        { expiresIn: +config.token_expire }
                      ),
                });
             } else {
