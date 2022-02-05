@@ -16,4 +16,8 @@ route.use("/v1", v1TaskRouter);
 
 route.use("/", addressRouter);
 
+route.get("/health", (req, res) => {
+   return res.status(200).json("OK");
+});
+
 export default route;
