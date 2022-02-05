@@ -43,6 +43,7 @@ try {
 }
 
 app.use("/api", routes);
+
 // const opts = {};
 // opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 // opts.secretOrKey = process.env.TOKEN_SECRET;
