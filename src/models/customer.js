@@ -1,4 +1,5 @@
 "use strict";
+import moment from "moment";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
    class customer extends Model {
@@ -27,6 +28,9 @@ module.exports = (sequelize, DataTypes) => {
 
          customer.hasMany(models.tasks);
       }
+      getBirthday() {
+         return moment(this.birthday).format("DD MM YYYY");
+      }
    }
    customer.init(
       {
@@ -45,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             allowNull: false,
          },
-         birthday: DataTypes.DATE,
+         birthday: DataTypes.DATEONLY,
          gender: DataTypes.ENUM("Nam", "Nữ", "Khác"),
          personalID: DataTypes.STRING,
          idProvince: DataTypes.STRING,

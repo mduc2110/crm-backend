@@ -10,4 +10,6 @@ router.get("/tasks", taskController.getAll);
 router.put("/tasks", taskController.update);
 router.delete("/tasks", taskController.delete);
 
+router.get("/tasks_types", taskController.getType);
+
 export default router;

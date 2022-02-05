@@ -26,6 +26,7 @@ router.get(
 );
 router.put("/customers/:id", customerController.update);
 router.delete("/customers", customerController.delete);
+router.delete("/customerss", customerController.test);
 
 export default router;
 

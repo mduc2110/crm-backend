@@ -2,11 +2,14 @@ import db from "../models";
 import { getAddressData, validateAddressCode } from "../utils/addressHelper";
 import xlsx from "xlsx";
 import { excelDateFormater } from "../utils/excelDateFormater";
+import { getPagination, getPagingData } from "../utils/pagination";
 
 const Address = db.address;
 const Customer = db.customer;
 const CustomerStatus = db.customerStatus;
 const CustomerTag = db.customerTag;
+const Op = db.Sequelize.Op;
+const sequelize = db.sequelize;
 
 export const customerController = {
    create: async (req, res) => {
@@ -52,7 +55,21 @@ export const customerController = {
 
          const createdCustomer = await Customer.create(customer);
 
-         return res.status(201).json(createdCustomer);
+         return res.status(201).json({
+            id: createdCustomer.id,
+            customerName: createdCustomer.customerName,
+            phone: createdCustomer.phone,
+            email: createdCustomer.email,
+            birthday: createdCustomer.birthday,
+            gender: createdCustomer.gender,
+            personalID: createdCustomer.personalID,
+            customerStatusId: createdCustomer.customerStatusId,
+            customerTagId: createdCustomer.customerTagId,
+            idProvince: createdCustomer.idProvince,
+            idDistrict: createdCustomer.idDistrict,
+            idWard: createdCustomer.idWard,
+            detailAddress: createdCustomer.detailAddress,
+         });
       } catch (error) {
          res.status(400).json({ msg: error.message });
       }
@@ -79,6 +96,7 @@ export const customerController = {
                },
             ],
          });
+         console.log(customer.getBirthday());
          if (!customer) {
             throw Error("Customer not found!");
          }
@@ -118,10 +136,13 @@ export const customerController = {
    delete: async (req, res) => {
       try {
          const { customerIdArray } = req.body;
+         console.log(req.body.customerIdArray);
          if (!Array.isArray(customerIdArray)) {
+            console.log("customerIdArray must be an array");
             return res.status(400).json({ msg: "customerIdArray must be an array" });
          }
          if (customerIdArray.length === 0) {
+            console.log("customerIdArray array must have at least 1 id");
             return res.status(400).json({ msg: "customer id array must have at least 1 id" });
          }
          const result = await Customer.destroy({ where: { id: customerIdArray } });
@@ -134,29 +155,29 @@ export const customerController = {
             } been deleted `,
          });
       } catch (error) {
-         return res.status(400).json({ msg: error.message });
+         return res.status(401).json({ msg: error.message });
       }
    },
    getAll: async (req, res) => {
-      const getPagination = (page, limit) => {
-         const size = limit ? +limit : null;
-         const offset = page && +page !== 0 ? (+page - 1) * limit : null;
-         console.log(offset);
-         return { size, offset };
-      };
-      const getPagingData = (data, page, limit) => {
-         const { count: totalItems, rows: result } = data;
-         const currentPage = page ? +page : 0;
-         const totalPages = Math.ceil(totalItems / limit);
+      // const getPagination = (page, limit) => {
+      //    const size = limit ? +limit : null;
+      //    const offset = page && +page !== 0 ? (+page - 1) * limit : null;
+      //    console.log(offset);
+      //    return { size, offset };
+      // };
+      // const getPagingData = (data, page, limit) => {
+      //    const { count: totalItems, rows: results } = data;
+      //    const currentPage = page ? +page : 0;
+      //    const totalPages = Math.ceil(totalItems / limit);
 
-         return { totalItems, result, totalPages, currentPage };
-      };
+      //    return { totalItems, results, totalPages, currentPage };
+      // };
       try {
          const { page, limit, q } = req.query;
-         const condition = q ? { name: { [Op.like]: `%${q}%` } } : null;
+         const condition = q ? { customerName: { [Op.like]: `%${q}%` } } : null;
          const { size, offset } = getPagination(page, limit);
 
-         const customers = await Customer.findAll({
+         const customers = await Customer.findAndCountAll({
             attributes: {
                exclude: ["createdAt", "updatedAt", "customerStatusId", "customerTagId"],
             },
@@ -180,7 +201,7 @@ export const customerController = {
          });
          // getAddressData
          const customerTransformed = getPagingData(customers, page, limit);
-         return res.json(customers);
+         return res.json(customerTransformed);
       } catch (error) {
          return res.status(400).json({ msg: error.message });
       }
@@ -225,5 +246,9 @@ export const customerController = {
          //    message: "Could not upload the file: " + req.file.originalname,
          // });
       }
+   },
+   test: (req, res) => {
+      const idArray = req.body.idArray;
+      return res.json(idArray);
    },
 };

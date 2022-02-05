@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+const moment = require("moment");
 module.exports = (sequelize, DataTypes) => {
    class tasks extends Model {
       /**
@@ -43,9 +44,19 @@ module.exports = (sequelize, DataTypes) => {
          startTime: {
             type: DataTypes.DATE,
             allowNull: false,
+            get() {
+               return moment(this.dataValues.testDate).format("D-MM-YYYY HH:mm:ss"); // 'D MMM YYYY, LT'
+            },
          },
          endTime: {
             type: DataTypes.DATE,
+            allowNull: false,
+            get() {
+               return moment(this.dataValues.testDate).format("D-MM-YYYY HH:mm:ss"); // 'D MMM YYYY, LT'
+            },
+         },
+         status: {
+            type: DataTypes.ENUM("DONE", "PROCESSING", "POSTPONE", "FAIL", "CANCELLED"),
             allowNull: false,
          },
       },
