@@ -6,10 +6,12 @@ import jwt from "jsonwebtoken";
 import { finder } from "../utils/addressHelper";
 import db from "../models";
 import config from "../config";
+import { getPagination, getPagingData } from "../utils/pagination";
 
 const User = db.users;
 const Role = db.roles;
 const Permission = db.permissions;
+const Op = db.Sequelize.Op;
 
 // const opts = {};
 // opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
@@ -18,7 +20,6 @@ const Permission = db.permissions;
 // opts.audience = "yoursite.net";
 // passport.use(
 //    new JwtStrategy(opts, function (jwt_payload, done) {
-//       console.log(jwt_payload);
 //       User.findOne({ id: 1 }, function (err, user) {
 //          if (err) {
 //             return done(err, false);
@@ -60,7 +61,6 @@ export const userController = {
                },
             },
          });
-         // return res.status(200).json(user);
          if (user) {
             delete user.password;
             const validPass = await bcrypt.compare(password, user.password);
@@ -107,7 +107,6 @@ export const userController = {
          return res.json({ message: "password is required" });
       }
       const hashed_password = bcrypt.hashSync(password, salt);
-      // return res.json(hashed_password);
       try {
          const user = { username, password: hashed_password, email, name, roleId, phone, active };
          const response = await User.create(user);
@@ -118,19 +117,40 @@ export const userController = {
    },
    getAll: async (req, res) => {
       // console.log(finder.getProvinceName("thanh-pho-ha-noi"));
-      console.log(finder.getProvinceName("thanh-pho-ha-noi"));
-      console.log(finder.getDistrictName("thanh-pho-ho-chi-minh", "quan-tan-binh"));
-      console.log(finder.getWardName("quan-tan-binh", "26989-0001"));
-      return res.json("OK");
+      // console.log(finder.getDistrictName("thanh-pho-ho-chi-minh", "quan-tan-binh"));
+      // console.log(finder.getWardName("quan-tan-binh", "26989-0001"));
+      const { page, limit, q } = req.query;
+      const condition = q ? { name: { [Op.like]: `%${q}%` } } : {};
+      const { size, offset } = getPagination(page, limit);
+      condition.username = { [Op.not]: "ADMIN" };
+      try {
+         const user = await User.findAndCountAll({
+            where: condition,
+            attributes: {
+               exclude: ["password"],
+            },
+            limit: size,
+            offset: offset,
+         });
+         const userTransformed = getPagingData(user, page, limit);
+         return res.json(userTransformed);
+      } catch (error) {
+         return res.json({ msg: error.message });
+      }
    },
    getOne: async (req, res) => {
       return res.json(req.user); //by default if authenticate succcessfully req.user will be auto-set by passport (from jwt_payload)
    },
    update: async (req, res) => {
-      // console.log(req);
       return res.json("OK");
    },
    delete: async (req, res) => {
-      return res.json("OK");
+      const { id } = req.params;
+      try {
+         const result = await User.destroy({ where: { id } });
+         return res.status(200).json(result);
+      } catch (error) {
+         return res.status(401).json({ msg: error.message });
+      }
    },
 };

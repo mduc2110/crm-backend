@@ -1,7 +1,6 @@
 export const getPagination = (page, limit) => {
    const size = limit ? +limit : null;
    const offset = page && +page !== 0 ? (+page - 1) * limit : null;
-   console.log(offset);
    return { size, offset };
 };
 export const getPagingData = (data, page, limit) => {

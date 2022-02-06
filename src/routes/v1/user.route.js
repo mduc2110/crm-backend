@@ -10,12 +10,17 @@ const router = express.Router();
 //    return res.json("OK");
 // });
 
-router.get("/users/", userController.getAll);
-router.get("/user/:id", passport.authenticate("jwt", { session: false }), userController.getOne);
+router.get("/users/", passport.authenticate("jwt", { session: false }), userController.getAll);
+router.get("/users/:id", passport.authenticate("jwt", { session: false }), userController.getOne);
 
-router.post("/user/login", userController.login);
-router.post("/user", userController.create);
-router.put("/user", passport.authenticate("jwt", { session: false }), auth.userAuth, userController.update);
-router.delete("/user", userController.delete);
+router.post("/users/login", userController.login);
+router.post("/users", userController.create);
+router.put(
+   "/users",
+   passport.authenticate("jwt", { session: false }),
+   auth.userAuth,
+   userController.update
+);
+router.delete("/users/:id", userController.delete);
 
 export default router;

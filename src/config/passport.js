@@ -8,8 +8,6 @@ opts.secretOrKey = config.token_secret;
 export default (passport) => {
    passport.use(
       new JwtStrategy(opts, (jwt_payload, done) => {
-         console.log(jwt_payload);
-         console.log("---");
          done(null, jwt_payload);
          // User.findOne({ id: 1 }, function (err, user) {
          //    if (err) {

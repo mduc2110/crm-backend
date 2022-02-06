@@ -136,13 +136,10 @@ export const customerController = {
    delete: async (req, res) => {
       try {
          const { customerIdArray } = req.body;
-         console.log(req.body.customerIdArray);
          if (!Array.isArray(customerIdArray)) {
-            console.log("customerIdArray must be an array");
             return res.status(400).json({ msg: "customerIdArray must be an array" });
          }
          if (customerIdArray.length === 0) {
-            console.log("customerIdArray array must have at least 1 id");
             return res.status(400).json({ msg: "customer id array must have at least 1 id" });
          }
          const result = await Customer.destroy({ where: { id: customerIdArray } });

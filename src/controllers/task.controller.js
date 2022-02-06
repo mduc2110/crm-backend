@@ -30,7 +30,7 @@ export const taskController = {
          customerId,
          userId,
          taskTypeId,
-         status,
+         // status,
       } = req.body;
       try {
          const task = {
@@ -41,7 +41,7 @@ export const taskController = {
             customerId,
             userId,
             taskTypeId,
-            status,
+            status: "PROCESSING",
          };
          const result = await Task.create(task);
          res.status(201).json(result);
@@ -95,13 +95,18 @@ export const taskController = {
       const { from, to, status, page, limit, idType } = req.query;
       const { size, offset } = getPagination(page, limit);
       const where = {};
-      if (from) {
+      // if (from) {
+      //    where.createdAt = {
+      //       [Op.gte]: new Date(from),
+      //    };
+      // } else if (to) {
+      //    where.createdAt = {
+      //       [Op.lte]: new Date(to),
+      //    };
+      // }
+      if (from && to) {
          where.createdAt = {
-            [Op.gte]: new Date(from),
-         };
-      } else if (to) {
-         where.createdAt = {
-            [Op.lte]: new Date(to),
+            [Op.between]: [new Date(from), new Date(to)],
          };
       }
       if (status) {
