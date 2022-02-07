@@ -104,15 +104,15 @@ export const userController = {
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       if (!password) {
-         return res.json({ message: "password is required" });
+         return res.status(400).json({ message: "password is required" });
       }
       const hashed_password = bcrypt.hashSync(password, salt);
       try {
          const user = { username, password: hashed_password, email, name, roleId, phone, active };
          const response = await User.create(user);
-         return res.json({ data: response });
+         return res.status(200).json({ data: response });
       } catch (error) {
-         return res.json({ msg: error.message });
+         return res.status(400).json({ msg: error.message });
       }
    },
    getAll: async (req, res) => {
@@ -133,13 +133,23 @@ export const userController = {
             offset: offset,
          });
          const userTransformed = getPagingData(user, page, limit);
-         return res.json(userTransformed);
+         return res.status(200).json(userTransformed);
       } catch (error) {
-         return res.json({ msg: error.message });
+         return res.status(400).json({ msg: error.message });
       }
    },
    getOne: async (req, res) => {
-      return res.json(req.user); //by default if authenticate succcessfully req.user will be auto-set by passport (from jwt_payload)
+      const { id } = req.params;
+      try {
+         if (!id) {
+            return res.status(400).json({ msg: "Id user is requried" });
+         }
+         const user = await User.findByPk(id);
+         return res.json(user);
+      } catch (error) {
+         return res.status(400).json({ msg: error.message });
+      }
+      // return res.json(req.user); //by default if authenticate succcessfully req.user will be auto-set by passport (from jwt_payload)
    },
    update: async (req, res) => {
       return res.json("OK");
@@ -150,7 +160,7 @@ export const userController = {
          const result = await User.destroy({ where: { id } });
          return res.status(200).json(result);
       } catch (error) {
-         return res.status(401).json({ msg: error.message });
+         return res.status(400).json({ msg: error.message });
       }
    },
 };

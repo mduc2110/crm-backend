@@ -1,9 +1,9 @@
 {
    "development": {
-      "username": "root",
-      "password": "123456",
+      "username": "admin",
+      "password": "12345678",
       "database": "crm_db",
-      "host": "localhost",
+      "host": "crm-db.cpldafdrhcrl.us-east-2.rds.amazonaws.com",
       "dialect": "mysql",
       "logging": false,
       "timezone": "+07:00"

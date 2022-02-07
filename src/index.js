@@ -33,42 +33,32 @@ const appDir = dirname(require.main.filename);
 // console.log(appDir);
 // console.log(__dirname);
 
-try {
-   db.sequelize.sync().catch((err) => {
-      console.log(err.message);
-      // throw err;
-   });
-} catch (error) {
-   console.log(error.message);
-}
+db.sequelize.sync({ force: false }).catch((err) => {
+   console.log(err.message);
+});
 
 app.use("/api", routes);
 
-// const opts = {};
-// opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-// opts.secretOrKey = process.env.TOKEN_SECRET;
-// passport.use(
-//    new JwtStrategy(opts, (jwt_payload, done) => {
-//       console.log(jwt_payload);
-//       // done(null, jwt_payload);
-//    })
-// );
-
 app.post("/hook", (req, res) => {
    var events = req.body;
-
    events.forEach(function (event) {
-      // Here, you now have each event and can process them how you like
-      // processEvent(event);
       console.log(event);
    });
-   // return res.json("OK");
    return res.json(events);
 });
+
 app.get("/", passport.authenticate("jwt", { session: false }), (req, res) => {
    res.json("OK");
 });
-// console.log(config);
-app.listen(port, () => {
-   console.log(`Server is running on ${config.port}`);
-});
+
+db.sequelize
+   .authenticate()
+   .then(() => {
+      console.log("Database connected!");
+      app.listen(port, () => {
+         console.log(`Server is running on ${config.port}`);
+      });
+   })
+   .catch((err) => {
+      console.log(err.message);
+   });

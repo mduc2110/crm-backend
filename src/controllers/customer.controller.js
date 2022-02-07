@@ -6,8 +6,8 @@ import { getPagination, getPagingData } from "../utils/pagination";
 
 const Address = db.address;
 const Customer = db.customer;
-const CustomerStatus = db.customerStatus;
-const CustomerTag = db.customerTag;
+const CustomerStatus = db.customerstatus;
+const CustomerTag = db.customertag;
 const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
 

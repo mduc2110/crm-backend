@@ -10,14 +10,14 @@ module.exports = (sequelize, DataTypes) => {
        */
       static associate(models) {
          // define association here
-         customer.belongsTo(models.customerStatus, {
+         customer.belongsTo(models.customerstatus, {
             // foreignKey: "roleId",
             foreignKey: {
                field: "idStatus",
                allowNull: false,
             },
          });
-         customer.belongsTo(models.customerTag, {
+         customer.belongsTo(models.customertag, {
             // foreignKey: "roleId",
 
             foreignKey: {

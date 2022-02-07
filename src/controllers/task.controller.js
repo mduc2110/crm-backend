@@ -5,23 +5,12 @@ import { getPagination, getPagingData } from "../utils/pagination";
 const Task = db.tasks;
 const User = db.users;
 const Customer = db.customer;
-const TaskType = db.taskTypes;
+const TaskType = db.tasktypes;
 
 const Op = db.Sequelize.Op;
 
 export const taskController = {
    create: async (req, res) => {
-      // const { permissionName, description } = req.body;
-      // try {
-      //    const permission = {
-      //       permissionName,
-      //       description,
-      //    };
-      //    const result = await Task.create(permission);
-      //    res.status(201).json(result);
-      // } catch (error) {
-      //    res.status(400).json({ msg: error.message });
-      // }
       const {
          taskName,
          taskDescription,

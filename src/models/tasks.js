@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
                allowNull: false,
             },
          });
-         tasks.belongsTo(models.taskTypes, {
+         tasks.belongsTo(models.tasktypes, {
             foreignKey: {
                field: "taskTypeId",
                allowNull: false,
