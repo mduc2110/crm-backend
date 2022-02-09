@@ -1,7 +1,7 @@
 import fs from "fs";
-import provinceData from "Address/province.json";
-import districtData from "Address/district.json";
-import wardData from "Address/ward.json";
+import provinceData from "../static/address/province.json";
+import districtData from "../static/address/district.json";
+import wardData from "../static/address/ward.json";
 
 const provinceList = provinceData.province[0];
 
