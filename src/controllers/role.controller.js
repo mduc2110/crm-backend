@@ -2,6 +2,7 @@ import db from "../models";
 
 const Role = db.roles;
 const Permission = db.permissions;
+const Op = db.Sequelize.Op;
 
 export const roleController = {
    create: async (req, res) => {
@@ -38,5 +39,16 @@ export const roleController = {
    },
    update: async (req, res) => {},
    delete: async (req, res) => {},
-   getAll: async (req, res) => {},
+   getAll: async (req, res) => {
+      try {
+         const { page, limit, q } = req.query;
+         const condition = q ? { description: { [Op.like]: `%${q}%` } } : {};
+         const result = await Role.findAll({
+            where: condition,
+         });
+         return res.status(200).json(result);
+      } catch (error) {
+         return res.status(400).json({ msg: error.message });
+      }
+   },
 };

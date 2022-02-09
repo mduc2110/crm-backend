@@ -11,6 +11,8 @@ import { getPagination, getPagingData } from "../utils/pagination";
 const User = db.users;
 const Role = db.roles;
 const Permission = db.permissions;
+const Dept = db.depts;
+
 const Op = db.Sequelize.Op;
 
 // const opts = {};
@@ -100,11 +102,14 @@ export const userController = {
       }
    },
    create: async (req, res) => {
-      const { username, password, email, name, phone, roleId, active } = req.body;
+      const { username, password, confirmPassword, email, name, phone, roleId, active } = req.body;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       if (!password) {
          return res.status(400).json({ message: "password is required" });
+      }
+      if (password !== confirmPassword) {
+         return res.status(400).json({ message: "password does not match" });
       }
       const hashed_password = bcrypt.hashSync(password, salt);
       try {
@@ -127,14 +132,25 @@ export const userController = {
          const user = await User.findAndCountAll({
             where: condition,
             attributes: {
-               exclude: ["password"],
+               exclude: ["password", "deptId", "roleId"],
             },
+            include: [
+               {
+                  model: Dept,
+                  attributes: ["id", "departmentName"],
+               },
+               {
+                  model: Role,
+                  attributes: ["id", "description"],
+               },
+            ],
             limit: size,
             offset: offset,
          });
          const userTransformed = getPagingData(user, page, limit);
          return res.status(200).json(userTransformed);
       } catch (error) {
+         console.log(error.message);
          return res.status(400).json({ msg: error.message });
       }
    },
@@ -158,6 +174,15 @@ export const userController = {
       const { id } = req.params;
       try {
          const result = await User.destroy({ where: { id } });
+         return res.status(200).json(result);
+      } catch (error) {
+         return res.status(400).json({ msg: error.message });
+      }
+   },
+
+   getAllDept: async (req, res) => {
+      try {
+         const result = await Dept.findAll();
          return res.status(200).json(result);
       } catch (error) {
          return res.status(400).json({ msg: error.message });

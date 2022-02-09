@@ -23,4 +23,6 @@ router.put(
 );
 router.delete("/users/:id", userController.delete);
 
+router.get("/depts", userController.getAllDept);
+
 export default router;
