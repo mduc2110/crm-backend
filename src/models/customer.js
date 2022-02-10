@@ -28,9 +28,9 @@ module.exports = (sequelize, DataTypes) => {
 
          customer.hasMany(models.tasks);
       }
-      getBirthday() {
-         return moment(this.birthday).format("DD MM YYYY");
-      }
+      // getBirthday() {
+      //    return moment(this.birthday).format("DD MM YYYY");
+      // }
    }
    customer.init(
       {

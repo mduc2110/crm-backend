@@ -13,20 +13,7 @@ const sequelize = db.sequelize;
 
 export const customerController = {
    create: async (req, res) => {
-      const {
-         customerName,
-         phone,
-         email,
-         birthday,
-         gender,
-         personalID,
-         idStatus,
-         idTag,
-         idProvince,
-         idDistrict,
-         idWard,
-         detailAddress,
-      } = req.body;
+      const { customerName, phone, email, birthday, gender, personalID, idStatus, idTag, idProvince, idDistrict, idWard, detailAddress } = req.body;
       try {
          // const address = { idProvince, idDistrict, idWard, detailAddress };
 
@@ -37,7 +24,6 @@ export const customerController = {
          // const createdAddress = await Address.create(address);
 
          // const addressId = createdAddress.id;
-
          const customer = {
             customerName,
             phone,
@@ -45,8 +31,8 @@ export const customerController = {
             birthday,
             gender,
             personalID,
-            customerStatusId: idStatus,
-            customerTagId: idTag,
+            customerstatusId: idStatus,
+            customertagId: idTag,
             idProvince,
             idDistrict,
             idWard,
@@ -63,8 +49,8 @@ export const customerController = {
             birthday: createdCustomer.birthday,
             gender: createdCustomer.gender,
             personalID: createdCustomer.personalID,
-            customerStatusId: createdCustomer.customerStatusId,
-            customerTagId: createdCustomer.customerTagId,
+            customerttatusId: createdCustomer.customerStatusId,
+            customertagId: createdCustomer.customerTagId,
             idProvince: createdCustomer.idProvince,
             idDistrict: createdCustomer.idDistrict,
             idWard: createdCustomer.idWard,
@@ -79,7 +65,7 @@ export const customerController = {
       try {
          const customer = await Customer.findByPk(id, {
             attributes: {
-               exclude: ["createdAt", "updatedAt", "customerStatusId", "customerTagId"],
+               exclude: ["createdAt", "updatedAt", "customerstatusId", "customertagId"],
             },
             include: [
                {
@@ -96,7 +82,6 @@ export const customerController = {
                },
             ],
          });
-         console.log(customer.getBirthday());
          if (!customer) {
             throw Error("Customer not found!");
          }
@@ -115,10 +100,7 @@ export const customerController = {
 
          const formattedCustomerObject = {
             ...customer.dataValues,
-            address:
-               idProvince && idDistrict && idWard && detailAddress
-                  ? getAddressData(idProvince, idDistrict, idWard, detailAddress)
-                  : {},
+            address: idProvince && idDistrict && idWard && detailAddress ? getAddressData(idProvince, idDistrict, idWard, detailAddress) : {},
             // address: getAddressData(idProvince, idDistrict, idWard, detailAddress),
          };
 
@@ -132,7 +114,18 @@ export const customerController = {
          return res.status(400).json({ msg: error.message });
       }
    },
-   update: async (req, res) => {},
+   update: async (req, res) => {
+      try {
+         const customer = await Customer.findAll({
+            where: {
+               id: [81, 82, 83],
+            },
+         });
+         return res.status(200).json(customer);
+      } catch (error) {
+         return res.status(400).json({ msg: error.message });
+      }
+   },
    delete: async (req, res) => {
       try {
          const { customerIdArray } = req.body;
@@ -147,9 +140,7 @@ export const customerController = {
             return res.status(200).json({ msg: `No customer has been deleted.` });
          }
          return res.status(200).json({
-            msg: `${result} customer${result <= 1 ? "" : "s"} ha${
-               result === 1 ? "s" : "ve"
-            } been deleted `,
+            msg: `${result} customer${result <= 1 ? "" : "s"} ha${result === 1 ? "s" : "ve"} been deleted `,
          });
       } catch (error) {
          return res.status(401).json({ msg: error.message });
@@ -169,6 +160,8 @@ export const customerController = {
 
       //    return { totalItems, results, totalPages, currentPage };
       // };
+      // const test = await CustomerTag.findAll();
+      // return res.json(test);
       try {
          const { page, limit, q } = req.query;
          const condition = q ? { customerName: { [Op.like]: `%${q}%` } } : null;
@@ -176,7 +169,7 @@ export const customerController = {
 
          const customers = await Customer.findAndCountAll({
             attributes: {
-               exclude: ["createdAt", "updatedAt", "customerStatusId", "customerTagId"],
+               exclude: ["createdAt", "updatedAt", "customerstatusId", "customertagId"],
             },
             include: [
                {
@@ -222,17 +215,42 @@ export const customerController = {
                birthday: excelDateFormater(item["Ngày sinh"]),
                gender: item["Giới tính"],
                personalID: item["Căn cước công dân"],
-               customerStatusId: 1,
-               customerTagId: 1,
+               customerstatusId: 1,
+               customertagId: 1,
                idProvince: item["Thành phố"],
                idDistrict: item["Quận/Huyện"],
                idWard: item["Phường"],
                detailAddress: item["Địa chỉ chi tiết"],
             };
          });
+
          try {
-            // const response = await Customer.bulkCreate(customersUpload);
-            return res.status(201).json(customersUpload);
+            const response = await Customer.bulkCreate(customersUpload);
+            const idList = response.map((customer) => customer.id);
+            const customers = await Customer.findAll({
+               where: {
+                  id: idList,
+               },
+               attributes: {
+                  exclude: ["createdAt", "updatedAt", "customerstatusId", "customertagId"],
+               },
+               include: [
+                  {
+                     model: CustomerTag,
+                     attributes: {
+                        exclude: ["createdAt", "updatedAt"],
+                     },
+                  },
+                  {
+                     model: CustomerStatus,
+                     attributes: {
+                        exclude: ["createdAt", "updatedAt"],
+                     },
+                  },
+               ],
+            });
+
+            return res.status(201).json(response);
          } catch (error) {
             return res.status(400).json({ msg: error.message });
          }
