@@ -102,9 +102,13 @@ export const userController = {
       }
    },
    create: async (req, res) => {
-      const { username, password, confirmPassword, email, name, phone, roleId, active } = req.body;
+      const { username, password, confirmPassword, email, name, phone, roleId, deptId } = req.body;
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
+      const user = await User.findOne({ where: { username: username } });
+      if (user) {
+         return res.status(400).json({ message: "Tên đăng nhập đã được sử dụng" });
+      }
       if (!password) {
          return res.status(400).json({ message: "password is required" });
       }
@@ -113,9 +117,33 @@ export const userController = {
       }
       const hashed_password = bcrypt.hashSync(password, salt);
       try {
-         const user = { username, password: hashed_password, email, name, roleId, phone, active };
-         const response = await User.create(user);
-         return res.status(200).json({ data: response });
+         const user = {
+            username,
+            password: hashed_password,
+            email,
+            name,
+            roleId,
+            phone,
+            active: true,
+            deptId,
+         };
+         const createdUser = await User.create(user);
+         const userData = await User.findByPk(createdUser.id, {
+            attributes: {
+               exclude: ["password", "deptId", "roleId", "createdAt", "updatedAt"],
+            },
+            include: [
+               {
+                  model: Dept,
+                  attributes: ["id", "departmentName"],
+               },
+               {
+                  model: Role,
+                  attributes: ["id", "description"],
+               },
+            ],
+         });
+         return res.status(200).json(userData);
       } catch (error) {
          return res.status(400).json({ msg: error.message });
       }
@@ -182,9 +210,14 @@ export const userController = {
 
    getAllDept: async (req, res) => {
       try {
-         const result = await Dept.findAll();
+         const condition = {};
+         condition.departmentName = { [Op.not]: "ADMIN" };
+         const result = await Dept.findAll({
+            where: condition,
+         });
          return res.status(200).json(result);
       } catch (error) {
+         console.log({ msg: error.message });
          return res.status(400).json({ msg: error.message });
       }
    },
