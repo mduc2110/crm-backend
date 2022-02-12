@@ -20,7 +20,11 @@ export const permissionController = {
    delete: async (req, res) => {},
    getAll: async (req, res) => {
       try {
-         const permissions = await Permissions.findAll();
+         const permissions = await Permissions.findAll({
+            attributes: {
+               exclude: ["createdAt", "updatedAt"],
+            },
+         });
          res.json(permissions);
       } catch (error) {
          res.status(400).json({ msg: error.message });

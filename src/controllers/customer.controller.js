@@ -13,7 +13,20 @@ const sequelize = db.sequelize;
 
 export const customerController = {
    create: async (req, res) => {
-      const { customerName, phone, email, birthday, gender, personalID, idStatus, idTag, idProvince, idDistrict, idWard, detailAddress } = req.body;
+      const {
+         customerName,
+         phone,
+         email,
+         birthday,
+         gender,
+         personalID,
+         idStatus,
+         idTag,
+         idProvince,
+         idDistrict,
+         idWard,
+         detailAddress,
+      } = req.body;
       try {
          // const address = { idProvince, idDistrict, idWard, detailAddress };
 
@@ -40,24 +53,43 @@ export const customerController = {
          };
 
          const createdCustomer = await Customer.create(customer);
-
-         return res.status(201).json({
-            id: createdCustomer.id,
-            customerName: createdCustomer.customerName,
-            phone: createdCustomer.phone,
-            email: createdCustomer.email,
-            birthday: createdCustomer.birthday,
-            gender: createdCustomer.gender,
-            personalID: createdCustomer.personalID,
-            customerttatusId: createdCustomer.customerStatusId,
-            customertagId: createdCustomer.customerTagId,
-            idProvince: createdCustomer.idProvince,
-            idDistrict: createdCustomer.idDistrict,
-            idWard: createdCustomer.idWard,
-            detailAddress: createdCustomer.detailAddress,
+         const customerData = await Customer.findByPk(createdCustomer.id, {
+            attributes: {
+               exclude: ["createdAt", "updatedAt", "customerstatusId", "customertagId"],
+            },
+            include: [
+               {
+                  model: CustomerTag,
+                  attributes: {
+                     exclude: ["createdAt", "updatedAt"],
+                  },
+               },
+               {
+                  model: CustomerStatus,
+                  attributes: {
+                     exclude: ["createdAt", "updatedAt"],
+                  },
+               },
+            ],
          });
+         return res.status(201).json(customerData);
+         // return res.status(201).json({
+         //    id: createdCustomer.id,
+         //    customerName: createdCustomer.customerName,
+         //    phone: createdCustomer.phone,
+         //    email: createdCustomer.email,
+         //    birthday: createdCustomer.birthday,
+         //    gender: createdCustomer.gender,
+         //    personalID: createdCustomer.personalID,
+         //    customerttatusId: createdCustomer.customerStatusId,
+         //    customertagId: createdCustomer.customerTagId,
+         //    idProvince: createdCustomer.idProvince,
+         //    idDistrict: createdCustomer.idDistrict,
+         //    idWard: createdCustomer.idWard,
+         //    detailAddress: createdCustomer.detailAddress,
+         // });
       } catch (error) {
-         res.status(400).json({ msg: error.message });
+         return res.status(400).json({ msg: error.message });
       }
    },
    getOne: async (req, res) => {
@@ -100,7 +132,10 @@ export const customerController = {
 
          const formattedCustomerObject = {
             ...customer.dataValues,
-            address: idProvince && idDistrict && idWard && detailAddress ? getAddressData(idProvince, idDistrict, idWard, detailAddress) : {},
+            address:
+               idProvince && idDistrict && idWard && detailAddress
+                  ? getAddressData(idProvince, idDistrict, idWard, detailAddress)
+                  : {},
             // address: getAddressData(idProvince, idDistrict, idWard, detailAddress),
          };
 
@@ -140,28 +175,15 @@ export const customerController = {
             return res.status(200).json({ msg: `No customer has been deleted.` });
          }
          return res.status(200).json({
-            msg: `${result} customer${result <= 1 ? "" : "s"} ha${result === 1 ? "s" : "ve"} been deleted `,
+            msg: `${result} customer${result <= 1 ? "" : "s"} ha${
+               result === 1 ? "s" : "ve"
+            } been deleted `,
          });
       } catch (error) {
          return res.status(401).json({ msg: error.message });
       }
    },
    getAll: async (req, res) => {
-      // const getPagination = (page, limit) => {
-      //    const size = limit ? +limit : null;
-      //    const offset = page && +page !== 0 ? (+page - 1) * limit : null;
-      //    console.log(offset);
-      //    return { size, offset };
-      // };
-      // const getPagingData = (data, page, limit) => {
-      //    const { count: totalItems, rows: results } = data;
-      //    const currentPage = page ? +page : 0;
-      //    const totalPages = Math.ceil(totalItems / limit);
-
-      //    return { totalItems, results, totalPages, currentPage };
-      // };
-      // const test = await CustomerTag.findAll();
-      // return res.json(test);
       try {
          const { page, limit, q } = req.query;
          const condition = q ? { customerName: { [Op.like]: `%${q}%` } } : null;
@@ -188,8 +210,8 @@ export const customerController = {
             where: condition,
             limit: size,
             offset: offset,
+            order: [["createdAt", "DESC"]],
          });
-         // getAddressData
          const customerTransformed = getPagingData(customers, page, limit);
          return res.json(customerTransformed);
       } catch (error) {
@@ -250,7 +272,7 @@ export const customerController = {
                ],
             });
 
-            return res.status(201).json(response);
+            return res.status(201).json(customers);
          } catch (error) {
             return res.status(400).json({ msg: error.message });
          }
@@ -261,6 +283,10 @@ export const customerController = {
          //    message: "Could not upload the file: " + req.file.originalname,
          // });
       }
+   },
+   downloadSample: (req, res) => {
+      const file = "src/static/assets/Excel template.xlsx";
+      res.download(file);
    },
    test: (req, res) => {
       const idArray = req.body.idArray;

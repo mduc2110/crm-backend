@@ -16,4 +16,9 @@ router.delete(
    roleController.delete
 );
 
+router.get("/role_permissions/:id", roleController.getPermissionWithRoleId);
+router.post("/role_permissions", roleController.updatePermissionForRole);
+
+// router.get("/permissions", roleController.getAllPermision);
+
 export default router;
