@@ -21,6 +21,7 @@
    },
    "homepage": "https://github.com/mduc2110/crm-backend#readme",
    "dependencies": {
+      "@sendgrid/mail": "^7.6.1",
       "axios": "^0.24.0",
       "bcrypt": "^5.0.1",
       "cors": "^2.8.5",

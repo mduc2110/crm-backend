@@ -9,6 +9,21 @@ const TaskType = db.tasktypes;
 
 const Op = db.Sequelize.Op;
 
+const include = [
+   {
+      model: User,
+      attributes: ["id", "name"],
+   },
+   {
+      model: Customer,
+      attributes: ["customerName", "id"],
+   },
+   {
+      model: TaskType,
+      attributes: ["nameType", "id"],
+   },
+];
+
 export const taskController = {
    create: async (req, res) => {
       const {
@@ -18,7 +33,7 @@ export const taskController = {
          endTime,
          customerId,
          userId,
-         taskTypeId,
+         tasktypeId,
          // status,
       } = req.body;
       try {
@@ -29,15 +44,31 @@ export const taskController = {
             endTime,
             customerId,
             userId,
-            taskTypeId,
+            tasktypeId,
             status: "PROCESSING",
          };
-         const result = await Task.create(task);
-         res.status(201).json(result);
+         const createdTask = await Task.create(task);
+         const result = await Task.findByPk(createdTask.id, {
+            include: [
+               {
+                  model: User,
+                  attributes: ["id", "name"],
+               },
+               {
+                  model: Customer,
+                  attributes: ["customerName", "id"],
+               },
+               {
+                  model: TaskType,
+                  attributes: ["nameType", "id"],
+               },
+            ],
+         });
+         return res.status(201).json(result);
       } catch (error) {
-         res.status(400).json({ msg: error.message });
+         console.log(error.message);
+         return res.status(400).json({ msg: error.message });
       }
-      return res.json("OK");
    },
    getOne: async (req, res) => {
       const { id } = req.params;
@@ -70,7 +101,49 @@ export const taskController = {
          res.status(400).json({ msg: error.message });
       }
    },
-   update: async (req, res) => {},
+   update: async (req, res) => {
+      const { id } = req.params;
+      const {
+         startTime,
+         endTime,
+         taskName,
+         taskDescription,
+         status,
+         customerId,
+         userId,
+         tasktypeId,
+      } = req.body;
+      if (!id) {
+         throw Error("Missing task id");
+      }
+      try {
+         const task = await Task.findByPk(id, {
+            include,
+         });
+
+         task.startTime = startTime;
+         task.endTime = endTime;
+         task.taskName = taskName;
+         task.taskDescription = taskDescription;
+         task.status = status;
+         task.updatedAt = new Date();
+         task.customerId = customerId;
+         task.userId = userId;
+         task.tasktypeId = tasktypeId;
+
+         await task.save();
+
+         const result = await Task.findByPk(id, {
+            attributes: {
+               exclude: ["userId", "customerId", "tasktypeId"],
+            },
+            include,
+         });
+         return res.status(200).json(result);
+      } catch (error) {
+         return res.status(400).json({ msg: error.message });
+      }
+   },
    delete: async (req, res) => {
       const { id } = req.params;
       try {
@@ -108,7 +181,7 @@ export const taskController = {
          const tasks = await Task.findAndCountAll({
             where: where,
             attributes: {
-               exclude: ["userId", "customerId", "taskTypeId"],
+               exclude: ["userId", "customerId", "tasktypeId"],
             },
             include: [
                {

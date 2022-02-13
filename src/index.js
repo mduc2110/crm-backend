@@ -39,7 +39,7 @@ db.sequelize.sync({ force: false }).catch((err) => {
 
 app.use("/api", routes);
 
-app.post("/hook", (req, res) => {
+app.post("/webhook", (req, res) => {
    var events = req.body;
    events.forEach(function (event) {
       console.log(event);

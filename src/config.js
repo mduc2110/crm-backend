@@ -12,7 +12,6 @@ const parsed = dotenv.config({
 }).parsed;
 
 const config = {};
-
 Object.keys(parsed).forEach((key) => {
    config[key.toLowerCase()] = parsed[key];
 });

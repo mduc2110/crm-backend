@@ -44,16 +44,16 @@ module.exports = (sequelize, DataTypes) => {
          startTime: {
             type: DataTypes.DATE,
             allowNull: false,
-            get() {
-               return moment(this.dataValues.testDate).format("D-MM-YYYY HH:mm:ss"); // 'D MMM YYYY, LT'
-            },
+            // get() {
+            //    return moment(this.dataValues.startTime).format("D-MM-YYYY HH:mm:ss"); // 'D MMM YYYY, LT'
+            // },
          },
          endTime: {
             type: DataTypes.DATE,
             allowNull: false,
-            get() {
-               return moment(this.dataValues.testDate).format("D-MM-YYYY HH:mm:ss"); // 'D MMM YYYY, LT'
-            },
+            // get() {
+            //    return moment(this.dataValues.endTime).format("D-MM-YYYY HH:mm:ss"); // 'D MMM YYYY, LT'
+            // },
          },
          status: {
             type: DataTypes.ENUM("DONE", "PROCESSING", "POSTPONE", "FAIL", "CANCELLED"),
