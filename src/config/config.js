@@ -63,5 +63,6 @@ module.exports = {
          //    ca: fs.readFileSync(__dirname + "/mysql-ca-main.crt"),
          // },
       },
+      timezone: "+07:00",
    },
 };
