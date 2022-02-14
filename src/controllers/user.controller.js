@@ -51,13 +51,7 @@ export const userController = {
                include: {
                   model: Permission,
                   attributes: {
-                     exclude: [
-                        "createdAt",
-                        "updatedAt",
-                        "asso_role_permissions",
-                        "id",
-                        "description",
-                     ],
+                     exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"],
                   },
                   through: { attributes: [] },
                },
@@ -188,7 +182,21 @@ export const userController = {
          if (!id) {
             return res.status(400).json({ msg: "Id user is requried" });
          }
-         const user = await User.findByPk(id);
+         const user = await User.findByPk(id, {
+            attributes: {
+               exclude: ["password", "deptId", "roleId"],
+            },
+            include: [
+               {
+                  model: Dept,
+                  attributes: ["id", "departmentName"],
+               },
+               {
+                  model: Role,
+                  attributes: ["id", "description"],
+               },
+            ],
+         });
          return res.json(user);
       } catch (error) {
          return res.status(400).json({ msg: error.message });
