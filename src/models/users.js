@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
          });
 
          users.hasMany(models.tasks);
+         users.hasMany(models.campaigns);
       }
    }
    users.init(

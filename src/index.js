@@ -1,5 +1,6 @@
 import express from "express";
 import routes from "./routes";
+import webhook from "./webhook/sendGrid";
 import db from "./models";
 import passport from "passport";
 import { ExtractJwt } from "passport-jwt/lib";
@@ -38,14 +39,15 @@ db.sequelize.sync({ force: false }).catch((err) => {
 });
 
 app.use("/api", routes);
+app.use("/webhook", webhook);
 
-app.post("/webhook", (req, res) => {
-   var events = req.body;
-   events.forEach(function (event) {
-      console.log(event);
-   });
-   return res.json(events);
-});
+// app.post("/webhook", (req, res) => {
+//    var events = req.body;
+//    events.forEach(function (event) {
+//       console.log(event);
+//    });
+//    return res.json(events);
+// });
 
 app.get("/", passport.authenticate("jwt", { session: false }), (req, res) => {
    res.json("OK");
