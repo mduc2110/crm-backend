@@ -13,8 +13,6 @@ add this to package.json
 
 "start": "nodemon ./server.js --exec babel-node -e js" -->
 
-This project suppose for integration that between `Delivery master` and each `Shipper's API`.
-
 ## Basic environment
 
 This project developed under the below environment.
@@ -23,7 +21,6 @@ This project developed under the below environment.
    -  ORM : sequelize
 -  Node.js
    -  Version : v14.15.1
-   -  OSX x86
 -  Express
 -  Javascript ES6 & ES5 & Common
    -  Babel
