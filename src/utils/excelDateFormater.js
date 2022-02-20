@@ -3,5 +3,5 @@ export const excelDateFormater = (date) => {
    const date_info = new Date(utc_value * 1000);
    const month = parseInt(date_info.getMonth()) + 1;
    const newDate = date_info.getFullYear() + "-" + month + "-" + date_info.getDate();
-   return newDate;
+   return new Date(newDate);
 };

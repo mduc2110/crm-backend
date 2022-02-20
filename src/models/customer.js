@@ -1,5 +1,4 @@
 "use strict";
-import moment from "moment";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
    class customer extends Model {

@@ -2,7 +2,7 @@ import fs from "fs";
 import provinceData from "../static/address/province.json";
 import districtData from "../static/address/district.json";
 import wardData from "../static/address/ward.json";
-
+import { removeVietnameseCharacter } from "./removeVietnameseCharacter";
 const provinceList = provinceData.province[0];
 
 const getDistrictListByProvinceCode = (provinceCode) => {
@@ -97,4 +97,54 @@ export const getAddressData = (provinceCode, districtCode, wardCode, detailAddre
       ward,
       detailAddress,
    };
+};
+
+export const getProvinceCode = (provinceName) => {
+   if (!provinceName) {
+      return "";
+   }
+   const formattedProvinceName = removeVietnameseCharacter(provinceName);
+   const province = provinceList.find((element) =>
+      removeVietnameseCharacter(element.name).includes(formattedProvinceName)
+   );
+   if (province) {
+      return province.code;
+   } else {
+      return undefined;
+   }
+};
+
+export const getDistrictCode = (districtName) => {
+   if (!districtName) {
+      return "";
+   }
+   const districtList = [].concat.apply([], Object.values(districtData.district));
+   const formattedDistrictName = removeVietnameseCharacter(districtName);
+   const district = districtList.find((element) =>
+      removeVietnameseCharacter(element.name).includes(formattedDistrictName)
+   );
+   if (district) {
+      return district.code;
+   } else {
+      return undefined;
+   }
+};
+
+export const getWardCode = (wardName, districtCode) => {
+   if (!districtCode) {
+      return undefined;
+   }
+   const wardListByDistrict = wardData.ward[districtCode];
+   if (!wardName) {
+      return "";
+   }
+   const formattedWardName = removeVietnameseCharacter(wardName);
+   const ward = wardListByDistrict.find((element) =>
+      removeVietnameseCharacter(element.name).includes(formattedWardName)
+   );
+   if (ward) {
+      return ward.code;
+   } else {
+      return undefined;
+   }
 };

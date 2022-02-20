@@ -1,5 +1,11 @@
 import db from "../models";
-import { getAddressData, validateAddressCode } from "../utils/addressHelper";
+import {
+   getAddressData,
+   getDistrictCode,
+   getProvinceCode,
+   getWardCode,
+   validateAddressCode,
+} from "../utils/addressHelper";
 import xlsx from "xlsx";
 import { excelDateFormater } from "../utils/excelDateFormater";
 import { getPagination, getPagingData } from "../utils/pagination";
@@ -230,18 +236,23 @@ export const customerController = {
          var sheet_name_list = workbook.SheetNames;
          var xlData = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
          const customersUpload = xlData.map((item) => {
+            // console.log(getDistrictCode(item["Quận/Huyện"]));
+            const provinceCode = getProvinceCode(item["Thành phố"]);
+            const districtCode = getDistrictCode(item["Quận/Huyện"]);
+            const wardCode = getWardCode(item["Phường"], districtCode);
             return {
                customerName: item["Tên khách hàng"],
                phone: item["Số điện thoại"],
                email: item["Email"],
                birthday: excelDateFormater(item["Ngày sinh"]),
+               // gender: "1999-10-21",
                gender: item["Giới tính"],
                personalID: item["Căn cước công dân"],
                customerstatusId: 1,
                customertagId: 1,
-               idProvince: item["Thành phố"],
-               idDistrict: item["Quận/Huyện"],
-               idWard: item["Phường"],
+               idProvince: provinceCode,
+               idDistrict: districtCode,
+               idWard: wardCode,
                detailAddress: item["Địa chỉ chi tiết"],
             };
          });
@@ -273,6 +284,7 @@ export const customerController = {
             });
 
             return res.status(201).json(customers);
+            // return res.status(201).json(customersUpload);
          } catch (error) {
             return res.status(400).json({ msg: error.message });
          }
