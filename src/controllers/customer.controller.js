@@ -17,6 +17,21 @@ const CustomerTag = db.customertag;
 const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
 
+const include = [
+   {
+      model: CustomerTag,
+      attributes: {
+         exclude: ["createdAt", "updatedAt"],
+      },
+   },
+   {
+      model: CustomerStatus,
+      attributes: {
+         exclude: ["createdAt", "updatedAt"],
+      },
+   },
+];
+
 export const customerController = {
    create: async (req, res) => {
       const {
@@ -156,13 +171,47 @@ export const customerController = {
       }
    },
    update: async (req, res) => {
+      const { id } = req.params;
+      const {
+         customerName,
+         phone,
+         email,
+         birthday,
+         gender,
+         personalID,
+         idStatus,
+         idTag,
+         idProvince,
+         idDistrict,
+         idWard,
+         detailAddress,
+      } = req.body;
       try {
-         const customer = await Customer.findAll({
-            where: {
-               id: [81, 82, 83],
-            },
+         const customer = await Customer.findByPk(id);
+
+         customer.customerName = customerName;
+         customer.phone = phone;
+         customer.email = email;
+         customer.birthday = birthday;
+         customer.gender = gender;
+         customer.personalID = personalID;
+         customer.customerstatusId = idStatus;
+         customer.customertagId = idTag;
+         customer.idProvince = idProvince;
+         customer.idDistrict = idDistrict;
+         customer.idWard = idWard;
+         customer.detailAddress = detailAddress;
+         // const customer = await Customer.findAll({
+         //    where: {
+         //       id: [81, 82, 83],
+         //    },
+         // });
+         await customer.save();
+
+         const result = await Customer.findByPk(id, {
+            include,
          });
-         return res.status(200).json(customer);
+         return res.status(200).json(result);
       } catch (error) {
          return res.status(400).json({ msg: error.message });
       }
