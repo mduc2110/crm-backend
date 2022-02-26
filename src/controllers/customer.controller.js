@@ -153,10 +153,7 @@ export const customerController = {
 
          const formattedCustomerObject = {
             ...customer.dataValues,
-            address:
-               idProvince && idDistrict && idWard && detailAddress
-                  ? getAddressData(idProvince, idDistrict, idWard, detailAddress)
-                  : {},
+            address: getAddressData(idProvince, idDistrict, idWard, detailAddress),
             // address: getAddressData(idProvince, idDistrict, idWard, detailAddress),
          };
 

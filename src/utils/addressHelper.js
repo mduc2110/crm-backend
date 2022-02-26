@@ -83,19 +83,22 @@ export const validateAddressCode = (provinceCode, districtCode, wardCode) => {
 };
 
 export const getAddressData = (provinceCode, districtCode, wardCode, detailAddress) => {
-   const province = provinceList.find((element) => element.code === provinceCode);
+   const province = provinceCode
+      ? provinceList.find((element) => element.code === provinceCode)
+      : {};
 
-   const districtList = getDistrictListByProvinceCode(provinceCode);
-   const district = districtList.find((element) => element.code === districtCode);
+   const districtList = provinceCode ? getDistrictListByProvinceCode(provinceCode) : [];
+   const district = districtCode
+      ? districtList.find((element) => element.code === districtCode)
+      : {};
 
-   const wardList = getWardListByDistrictCode(districtCode);
-   const ward = wardList.find((element) => element.code === wardCode);
-
+   const wardList = districtCode ? getWardListByDistrictCode(districtCode) : [];
+   const ward = wardCode ? wardList.find((element) => element.code === wardCode) : {};
    return {
-      province,
-      district,
-      ward,
-      detailAddress,
+      province: province ? province : "",
+      district: district ? district : "",
+      ward: ward ? ward : "",
+      detailAddress: detailAddress ? detailAddress : "",
    };
 };
 
