@@ -16,6 +16,7 @@ const CustomerStatus = db.customerstatus;
 const CustomerTag = db.customertag;
 const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
+const Sequelize = db.Sequelize;
 
 const include = [
    {
@@ -237,45 +238,76 @@ export const customerController = {
    },
    getAll: async (req, res) => {
       try {
-         const { from, to, page, limit, q } = req.query;
+         const { from, to, page, limit, q, year } = req.query;
          const condition = q ? { customerName: { [Op.like]: `%${q}%` } } : null;
          const { size, offset } = getPagination(page, limit);
 
          const where = {};
-         
-         if(from && to  ) {
+         const staticCondition = {};
+         if (from && to) {
             where.createdAt = {
                [Op.between]: [new Date(from), new Date(to)],
-            }
+            };
          }
-         if(q) {
-            where.customerName = { [Op.like]: `%${q}%` }
+         if (q) {
+            where.customerName = { [Op.like]: `%${q}%` };
          }
-         const customers = await Customer.findAndCountAll({
-            attributes: {
-               exclude: ["createdAt", "updatedAt", "customerstatusId", "customertagId"],
-            },
-            include: [
-               {
-                  model: CustomerTag,
-                  attributes: {
-                     exclude: ["createdAt", "updatedAt"],
-                  },
+
+         if (!year) {
+            const customers = await Customer.findAndCountAll({
+               attributes: {
+                  exclude: ["createdAt", "updatedAt", "customerstatusId", "customertagId"],
                },
-               {
-                  model: CustomerStatus,
-                  attributes: {
-                     exclude: ["createdAt", "updatedAt"],
+               include: [
+                  {
+                     model: CustomerTag,
+                     attributes: {
+                        exclude: ["createdAt", "updatedAt"],
+                     },
                   },
+                  {
+                     model: CustomerStatus,
+                     attributes: {
+                        exclude: ["createdAt", "updatedAt"],
+                     },
+                  },
+               ],
+               where: where,
+               limit: size,
+               offset: offset,
+               order: [["createdAt", "DESC"]],
+            });
+            const customerTransformed = getPagingData(customers, page, limit);
+            return res.json(customerTransformed);
+         } else {
+            // staticCondition[Op.and] = [
+            //    Sequelize.where(Sequelize.fn("YEAR", Sequelize.col("createdAt")), year),
+            // ];
+            staticCondition.createdAt = {
+               [Op.and]: [Sequelize.where(Sequelize.fn("YEAR", Sequelize.col("createdAt")), year)],
+            };
+
+            const customers = await Customer.findAll({
+               attributes: {
+                  exclude: ["updatedAt", "customerstatusId", "customertagId"],
                },
-            ],
-            where: where,
-            limit: size,
-            offset: offset,
-            order: [["createdAt", "DESC"]],
-         });
-         const customerTransformed = getPagingData(customers, page, limit);
-         return res.json(customerTransformed);
+               where: where,
+               where: where,
+               limit: size,
+               offset: offset,
+               order: ["createdAt"],
+            });
+            const monthsIndex = new Array(11).fill(0);
+            customers.forEach((element) => {
+               const monthElementIndex = new Date(element.createdAt).getMonth();
+               monthsIndex[monthElementIndex] += 1;
+            });
+            const result = {
+               year: year,
+               monthsIndex: monthsIndex,
+            };
+            return res.json(result);
+         }
       } catch (error) {
          return res.status(400).json({ msg: error.message });
       }
