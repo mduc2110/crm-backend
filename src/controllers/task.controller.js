@@ -154,7 +154,7 @@ export const taskController = {
       }
    },
    getAll: async (req, res) => {
-      const { from, to, status, page, limit, idType } = req.query;
+      const { from, to, status, page, limit, idType, userId } = req.query;
       const { size, offset } = getPagination(page, limit);
       const where = {};
       // if (from) {
@@ -176,6 +176,9 @@ export const taskController = {
       }
       if (idType) {
          where.taskTypeId = idType;
+      }
+      if (userId) {
+         where.userId = userId;
       }
       try {
          const tasks = await Task.findAndCountAll({

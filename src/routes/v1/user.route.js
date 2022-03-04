@@ -18,7 +18,7 @@ router.post("/users", userController.create);
 router.put(
    "/users",
    passport.authenticate("jwt", { session: false }),
-   auth.userAuth,
+   auth.writeUserAuth,
    userController.update
 );
 router.delete("/users/:id", userController.delete);

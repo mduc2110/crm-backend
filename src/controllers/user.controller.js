@@ -35,6 +35,19 @@ const Op = db.Sequelize.Op;
 //       });
 //    })
 // );
+const include = {
+   model: Role,
+   attributes: {
+      exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"],
+   },
+   include: {
+      model: Permission,
+      attributes: {
+         exclude: ["createdAt", "updatedAt", "asso_role_permissions", "id", "description"],
+      },
+      through: { attributes: [] },
+   },
+};
 
 export const userController = {
    login: async (req, res) => {
@@ -146,13 +159,27 @@ export const userController = {
       // console.log(finder.getProvinceName("thanh-pho-ha-noi"));
       // console.log(finder.getDistrictName("thanh-pho-ho-chi-minh", "quan-tan-binh"));
       // console.log(finder.getWardName("quan-tan-binh", "26989-0001"));
-      const { page, limit, q } = req.query;
+      const { from, to, page, limit, q } = req.query;
       const condition = q ? { name: { [Op.like]: `%${q}%` } } : {};
       const { size, offset } = getPagination(page, limit);
-      condition.username = { [Op.not]: "ADMIN" };
+      // condition.username = { [Op.not]: "ADMIN" };
+
+      const where = {};
+      where.username = { [Op.not]: "ADMIN" };
+      // where.createdAt = {
+      //    [Op.lte]: new Date(to),
+      // }
+      if(from && to ) {
+         where.createdAt = {
+            [Op.between] : [new Date(from), new Date(to)],
+         }
+      }
+      if(q) {
+         where.name = { [Op.like]: `%${q}%` }
+      }
       try {
          const user = await User.findAndCountAll({
-            where: condition,
+            where: where,
             attributes: {
                exclude: ["password", "deptId", "roleId"],
             },
@@ -204,7 +231,63 @@ export const userController = {
       // return res.json(req.user); //by default if authenticate succcessfully req.user will be auto-set by passport (from jwt_payload)
    },
    update: async (req, res) => {
-      return res.json("OK");
+      let id;
+      const {permission} = req;
+      switch (permission) {
+         case "MANAGER_WRITE":
+            id = req.body.id;
+            if (!id) {
+               return res.status(400).json({id: "id field is required"});
+            }
+            break;
+         case "USER_WRITE":
+            id = req.user.id;
+            break;
+         default:
+            id = req.user.id;
+            break;
+      }
+
+      const { password, confirmPassword, email, name, phone, roleId, deptId } = req.body;
+      const saltRounds = 10;
+      const salt = bcrypt.genSaltSync(saltRounds);
+      try {
+         const user = await User.findByPk(id);
+
+         if(password) {
+            if(password !== confirmPassword) {
+               return res.status(400).json({message: "Mật khẩu không trùng khớp"});
+            }
+            const hashed_password = bcrypt.hashSync(password, salt);
+            if(hashed_password === user.password) {
+               
+               return res.status(400).json({message: "Bạn đã nhập mật khẩu cũ"});
+            }
+            user.password = hashed_password;
+
+            await user.save();
+
+            return res.status(200).json({message: "Cập nhật mật khẩu thành công!"});
+         }else {
+            user.email = email;
+            user.name = name;
+            user.roleId = roleId;
+            user.phone = phone;
+            user.deptId = deptId;
+
+            await user.save();
+
+            const updatedUser = await User.findByPk(id, {
+               attributes: {
+                  exclude: ["password", "deptId", "roleId"],
+               },
+               include,
+            });
+            return res.status(200).json(updatedUser);
+         }
+      } catch (error) {
+         return res.status(400).json({msg: error.message});
+      }
    },
    delete: async (req, res) => {
       const { id } = req.params;

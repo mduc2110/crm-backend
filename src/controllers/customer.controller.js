@@ -237,10 +237,20 @@ export const customerController = {
    },
    getAll: async (req, res) => {
       try {
-         const { page, limit, q } = req.query;
+         const { from, to, page, limit, q } = req.query;
          const condition = q ? { customerName: { [Op.like]: `%${q}%` } } : null;
          const { size, offset } = getPagination(page, limit);
 
+         const where = {};
+         
+         if(from && to  ) {
+            where.createdAt = {
+               [Op.between]: [new Date(from), new Date(to)],
+            }
+         }
+         if(q) {
+            where.customerName = { [Op.like]: `%${q}%` }
+         }
          const customers = await Customer.findAndCountAll({
             attributes: {
                exclude: ["createdAt", "updatedAt", "customerstatusId", "customertagId"],
@@ -259,7 +269,7 @@ export const customerController = {
                   },
                },
             ],
-            where: condition,
+            where: where,
             limit: size,
             offset: offset,
             order: [["createdAt", "DESC"]],

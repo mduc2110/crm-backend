@@ -4,7 +4,7 @@ const isHadPermission = (permissionList, permissionType, role = "") => {
 
 export const auth = {
    userAuth: (req, res, next) => {
-      console.log(req.user);
+      // console.log(req.user);
       next();
    },
 
@@ -33,10 +33,14 @@ export const auth = {
       }
    },
    writeUserAuth: (req, res, next) => {
+      
       if (isHadPermission(req.user.permissions, "WRITE_USER", req.user.role)) {
+         req.permission = "MANAGER_WRITE";
          next();
       } else {
-         return res.status(403).json({ msg: "Forbidden" });
+         req.permission = "USER_WRITE";
+         next();
+         // return res.status(403).json({ msg: "Forbidden" });
       }
    },
    //Customer
