@@ -8,6 +8,7 @@ const Customer = db.customer;
 const TaskType = db.tasktypes;
 
 const Op = db.Sequelize.Op;
+const Sequelize = db.Sequelize;
 
 const include = [
    {
@@ -154,9 +155,10 @@ export const taskController = {
       }
    },
    getAll: async (req, res) => {
-      const { from, to, status, page, limit, idType, userId } = req.query;
+      const { from, to, status, page, limit, idType, userId, year } = req.query;
       const { size, offset } = getPagination(page, limit);
       const where = {};
+      const staticCondition = {};
       // if (from) {
       //    where.createdAt = {
       //       [Op.gte]: new Date(from),
@@ -166,55 +168,80 @@ export const taskController = {
       //       [Op.lte]: new Date(to),
       //    };
       // }
-      if (from && to) {
-         where.createdAt = {
-            [Op.between]: [new Date(from), new Date(to)],
-         };
-      }
-      if (status) {
-         where.status = status;
-      }
-      if (idType) {
-         where.taskTypeId = idType;
-      }
-      if (userId) {
-         where.userId = userId;
-      }
       try {
-         const tasks = await Task.findAndCountAll({
-            where: where,
-            attributes: {
-               exclude: ["userId", "customerId", "tasktypeId"],
-            },
-            include: [
-               {
-                  model: User,
-                  attributes: ["id", "name"],
+         if (from && to) {
+            where.createdAt = {
+               [Op.between]: [new Date(from), new Date(to)],
+            };
+         }
+         if (status) {
+            where.status = status;
+         }
+         if (idType) {
+            where.taskTypeId = idType;
+         }
+         if (userId) {
+            where.userId = userId;
+         }
+         if (!year) {
+            const tasks = await Task.findAndCountAll({
+               where: where,
+               attributes: {
+                  exclude: ["userId", "customerId", "tasktypeId"],
                },
-               {
-                  model: Customer,
-                  attributes: ["customerName", "id"],
-               },
-               {
-                  model: TaskType,
-                  attributes: ["nameType", "id"],
-               },
-            ],
+               include: [
+                  {
+                     model: User,
+                     attributes: ["id", "name"],
+                  },
+                  {
+                     model: Customer,
+                     attributes: ["customerName", "id"],
+                  },
+                  {
+                     model: TaskType,
+                     attributes: ["nameType", "id"],
+                  },
+               ],
 
-            limit: size,
-            offset: offset,
-            // where: {
-            //    createdAt: {
-            //       // [Op.between]: [startDate && new Date(startDate), new Date(endDate)],
-            //       // [Op.between]: ["2022-02-02T11:57:59.000Z", "2022-02-02T11:57:59.000Z"],
-            //       [Op.gte]: new Date(startDate),
-            //       [Op.lte]: new Date(endDate),
-            //    },
-            //    // status: status ? status : null,
-            // },
-         });
-         const taskTransformed = getPagingData(tasks, page, limit);
-         return res.status(200).json(taskTransformed);
+               limit: size,
+               offset: offset,
+               // where: {
+               //    createdAt: {
+               //       // [Op.between]: [startDate && new Date(startDate), new Date(endDate)],
+               //       // [Op.between]: ["2022-02-02T11:57:59.000Z", "2022-02-02T11:57:59.000Z"],
+               //       [Op.gte]: new Date(startDate),
+               //       [Op.lte]: new Date(endDate),
+               //    },
+               //    // status: status ? status : null,
+               // },
+            });
+            const taskTransformed = getPagingData(tasks, page, limit);
+
+            return res.status(200).json(taskTransformed);
+         } else {
+            staticCondition.createdAt = {
+               [Op.and]: [Sequelize.where(Sequelize.fn("YEAR", Sequelize.col("createdAt")), year)],
+            };
+            const tasks = await Task.findAll({
+               attributes: {
+                  exclude: ["userId", "customerId", "tasktypeId"],
+               },
+               where: staticCondition,
+               order: ["createdAt"],
+            });
+            const monthsIndex = new Array(11).fill(0);
+            tasks.forEach((element) => {
+               const monthElementIndex = new Date(element.createdAt).getMonth();
+               monthsIndex[monthElementIndex] += 1;
+            });
+            const result = {
+               year: year,
+               monthsIndex: monthsIndex,
+            };
+
+            return res.json(result);
+         }
       } catch (error) {
          return res.status(400).json({ msg: error.message });
       }

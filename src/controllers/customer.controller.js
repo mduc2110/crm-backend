@@ -291,8 +291,7 @@ export const customerController = {
                attributes: {
                   exclude: ["updatedAt", "customerstatusId", "customertagId"],
                },
-               where: where,
-               where: where,
+               where: staticCondition,
                limit: size,
                offset: offset,
                order: ["createdAt"],
